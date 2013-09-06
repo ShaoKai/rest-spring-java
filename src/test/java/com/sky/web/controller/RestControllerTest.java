@@ -1,64 +1,92 @@
 package com.sky.web.controller;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-
-import org.junit.AfterClass;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mortbay.jetty.Server;
+import org.mortbay.jetty.webapp.WebAppContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.web.context.WebApplicationContext;
+import org.springframework.http.HttpMethod;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 
 import com.sky.web.WebConfig;
+import com.sky.web.tools.RestUtils;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = WebConfig.class)
-@WebAppConfiguration
 public class RestControllerTest {
-	@Autowired
-	protected WebApplicationContext wac;
-	protected MockMvc mockMvc;
+	private static Logger logger = LoggerFactory.getLogger(RestControllerTest.class);
+	private static Server server;
+	private final static String BASE_URL = "http://localhost:8080";
+	private final static String RESOURCE_BASE = "src/main/webapp";
 
-	@Before
-	public final void onSetup() throws Exception {
-		mockMvc = webAppContextSetup(wac).build();
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+
+		server = new Server(8080);
+
+		WebAppContext context = new WebAppContext();
+		context.setDescriptor(RESOURCE_BASE + "/WEB-INF/web.xml");
+		context.setResourceBase(RESOURCE_BASE);
+		context.setContextPath("/");
+		context.setParentLoaderPriority(true);
+
+		server.setHandler(context);
+
+		server.start();
+		logger.info("Startup the jetty server");
+	}
+
+	// SC_BAD_REQUEST
+	@Test(expected = HttpClientErrorException.class)
+	public void testBadRequest() throws Exception {
+		RestTemplate template = new RestTemplate();
+		HttpEntity<String> response = template.exchange(BASE_URL + "/rest/v1.0/message", HttpMethod.GET, null, String.class);
+	}
+
+	// SC_UNAUTHORIZED
+	@Test(expected = HttpClientErrorException.class)
+	public void testUnauthorized() throws Exception {
+		HttpHeaders requestHeaders = new HttpHeaders();
+		requestHeaders.set(WebConfig.SIGNATURE_HEADER_NAME, "123");
+		requestHeaders.set(WebConfig.ACCESS_TOKEN_HEADER_NAME, "123");
+
+		MultiValueMap<String, String> postParameters = new LinkedMultiValueMap<String, String>();
+		HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<MultiValueMap<String, String>>(postParameters, requestHeaders);
+
+		RestTemplate template = new RestTemplate();
+		HttpEntity<String> response = template.exchange(BASE_URL + "/rest/v1.0/message", HttpMethod.GET, requestEntity, String.class);
 	}
 
 	@Test
-	public void test1() throws Exception {
-		// @formatter:off
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.set(WebConfig.SIGNATURE_HEADER_NAME, "");
-		httpHeaders.set(WebConfig.ACCESS_TOKEN_HEADER_NAME, "");
-		
-		MockHttpServletRequestBuilder requestBuilder = get("/rest/v1.0/message");
-		requestBuilder.headers(httpHeaders);
-		
-		mockMvc.perform(requestBuilder).andDo(print()).andExpect(status().isBadRequest());
-									   
-		// @formatter:on
+	public void testMessageGet() throws Exception {
+		String accessToken = "XXXXXXX";
+		HttpHeaders requestHeaders = new HttpHeaders();
+		requestHeaders.set(WebConfig.SIGNATURE_HEADER_NAME, RestUtils.generateHmacSHA256Signature("", accessToken));
+		requestHeaders.set(WebConfig.ACCESS_TOKEN_HEADER_NAME, accessToken);
+
+		MultiValueMap<String, String> parameters = new LinkedMultiValueMap<String, String>();
+		HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<MultiValueMap<String, String>>(parameters, requestHeaders);
+
+		RestTemplate template = new RestTemplate();
+		HttpEntity<String> response = template.exchange(BASE_URL + "/rest/v1.0/message", HttpMethod.GET, requestEntity, String.class);
 	}
 
 	@Test
-	public void test() throws Exception {
-		// @formatter:off
-		mockMvc.perform(get("/rest/v1.0/message").header(WebConfig.SIGNATURE_HEADER_NAME, "")
-												.header(WebConfig.ACCESS_TOKEN_HEADER_NAME, ""))
-												.andDo(print()).andExpect(status().isBadRequest());
-									   
-		// @formatter:on
-	}
+	public void testMessagePost() throws Exception {
+		String accessToken = "XXXXXXX";
+		HttpHeaders requestHeaders = new HttpHeaders();
+		requestHeaders.set(WebConfig.SIGNATURE_HEADER_NAME, RestUtils.generateHmacSHA256Signature("id=1", accessToken));
+		requestHeaders.set(WebConfig.ACCESS_TOKEN_HEADER_NAME, accessToken);
 
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
+		MultiValueMap<String, String> parameters = new LinkedMultiValueMap<String, String>();
+		parameters.add("id", "1");
+		HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<MultiValueMap<String, String>>(parameters, requestHeaders);
+
+		RestTemplate template = new RestTemplate();
+		HttpEntity<String> response = template.exchange(BASE_URL + "/rest/v1.0/message", HttpMethod.POST, requestEntity, String.class);
 	}
 }

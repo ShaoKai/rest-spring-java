@@ -12,12 +12,12 @@ import org.springframework.web.servlet.ModelAndView;
 import com.sky.web.filter.MultiReadHttpServletRequest;
 import com.sky.web.tools.RestUtils;
 
-public class RestLoginAuthInterceptor implements HandlerInterceptor {
-	private static final Logger logger = LoggerFactory.getLogger(RestLoginAuthInterceptor.class);
+public class RestAuthInterceptor implements HandlerInterceptor {
+	private static final Logger logger = LoggerFactory.getLogger(RestAuthInterceptor.class);
 	private String signatureHeaderName;
 	private String accessKeyHeaderName;
 
-	public RestLoginAuthInterceptor(String signatureHeaderName, String accessKeyHeaderName) {
+	public RestAuthInterceptor(String signatureHeaderName, String accessKeyHeaderName) {
 		super();
 		this.signatureHeaderName = signatureHeaderName;
 		this.accessKeyHeaderName = accessKeyHeaderName;

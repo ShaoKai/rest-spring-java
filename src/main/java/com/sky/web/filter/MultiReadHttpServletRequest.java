@@ -68,6 +68,7 @@ public class MultiReadHttpServletRequest extends HttpServletRequestWrapper {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		logger.info("requestBody : {}", buffer.toString());
 		return buffer.toString();
 	}
 
