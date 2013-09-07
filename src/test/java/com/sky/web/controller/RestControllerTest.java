@@ -6,6 +6,7 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -15,6 +16,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.sky.web.WebConfig;
+import com.sky.web.service.UserService;
 import com.sky.web.tools.RestUtils;
 
 public class RestControllerTest {
@@ -63,9 +65,11 @@ public class RestControllerTest {
 
 	@Test
 	public void testMessageGet() throws Exception {
-		String accessToken = "XXXXXXX";
+
+		String accessToken = "accesskey1";
+		String secretKey = "secretkey1";
 		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.set(WebConfig.SIGNATURE_HEADER_NAME, RestUtils.generateHmacSHA256Signature("", accessToken));
+		requestHeaders.set(WebConfig.SIGNATURE_HEADER_NAME, RestUtils.generateHmacSHA256Signature("", secretKey));
 		requestHeaders.set(WebConfig.ACCESS_TOKEN_HEADER_NAME, accessToken);
 
 		MultiValueMap<String, String> parameters = new LinkedMultiValueMap<String, String>();
@@ -77,9 +81,10 @@ public class RestControllerTest {
 
 	@Test
 	public void testMessagePost() throws Exception {
-		String accessToken = "XXXXXXX";
+		String accessToken = "accesskey1";
+		String secretKey = "secretkey1";
 		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.set(WebConfig.SIGNATURE_HEADER_NAME, RestUtils.generateHmacSHA256Signature("id=1", accessToken));
+		requestHeaders.set(WebConfig.SIGNATURE_HEADER_NAME, RestUtils.generateHmacSHA256Signature("id=1", secretKey));
 		requestHeaders.set(WebConfig.ACCESS_TOKEN_HEADER_NAME, accessToken);
 
 		MultiValueMap<String, String> parameters = new LinkedMultiValueMap<String, String>();

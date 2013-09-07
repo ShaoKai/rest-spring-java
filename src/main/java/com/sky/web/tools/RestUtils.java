@@ -7,8 +7,11 @@ import java.security.NoSuchAlgorithmException;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.apache.commons.lang.StringUtils;
+
 public class RestUtils {
 	public static String generateHmacSHA256Signature(String data, String key) throws GeneralSecurityException {
+	
 		SecretKeySpec secret_key = new javax.crypto.spec.SecretKeySpec(key.getBytes(), "HmacSHA256");
 		StringBuilder verificationResult = new StringBuilder();
 		try {
