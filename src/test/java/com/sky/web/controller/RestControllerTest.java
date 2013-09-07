@@ -1,5 +1,7 @@
 package com.sky.web.controller;
 
+import static org.junit.Assert.*;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mortbay.jetty.Server;
@@ -84,14 +86,55 @@ public class RestControllerTest {
 		String accessToken = "accesskey1";
 		String secretKey = "secretkey1";
 		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.set(WebConfig.SIGNATURE_HEADER_NAME, RestUtils.generateHmacSHA256Signature("id=1", secretKey));
+		requestHeaders.set(WebConfig.SIGNATURE_HEADER_NAME, RestUtils.generateHmacSHA256Signature("account=Eirc", secretKey));
 		requestHeaders.set(WebConfig.ACCESS_TOKEN_HEADER_NAME, accessToken);
 
 		MultiValueMap<String, String> parameters = new LinkedMultiValueMap<String, String>();
-		parameters.add("id", "1");
+		parameters.add("account", "Eirc");
 		HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<MultiValueMap<String, String>>(parameters, requestHeaders);
 
 		RestTemplate template = new RestTemplate();
 		HttpEntity<String> response = template.exchange(BASE_URL + "/rest/v1.0/message", HttpMethod.POST, requestEntity, String.class);
+		String etag = response.getHeaders().getETag();
+		logger.info("=====================================");
+		logger.info("Etag     : {}", response.getHeaders().getETag());
+		logger.info("Response : {}", response.getBody());
+
+	}
+
+	@Test
+	public void testEtag() throws Exception {
+		String accessToken = "accesskey1";
+		String secretKey = "secretkey1";
+		HttpHeaders requestHeaders = new HttpHeaders();
+		requestHeaders.set(WebConfig.SIGNATURE_HEADER_NAME, RestUtils.generateHmacSHA256Signature("", secretKey));
+		requestHeaders.set(WebConfig.ACCESS_TOKEN_HEADER_NAME, accessToken);
+
+		MultiValueMap<String, String> parameters = new LinkedMultiValueMap<String, String>();
+		HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<MultiValueMap<String, String>>(parameters, requestHeaders);
+
+		RestTemplate template = new RestTemplate();
+		HttpEntity<String> response = template.exchange(BASE_URL + "/rest/v1.0/message", HttpMethod.GET, requestEntity, String.class);
+		String etag = response.getHeaders().getETag();
+		logger.info("=====================================");
+		logger.info("Etag     : {}", response.getHeaders().getETag());
+		logger.info("Response : {}", response.getBody());
+
+		// send request with IfNoneMatch header
+
+		requestHeaders = new HttpHeaders();
+		requestHeaders.setIfNoneMatch(etag);
+		requestHeaders.set(WebConfig.SIGNATURE_HEADER_NAME, RestUtils.generateHmacSHA256Signature("", secretKey));
+		requestHeaders.set(WebConfig.ACCESS_TOKEN_HEADER_NAME, accessToken);
+
+		parameters = new LinkedMultiValueMap<String, String>();
+		requestEntity = new HttpEntity<MultiValueMap<String, String>>(parameters, requestHeaders);
+		response = template.exchange(BASE_URL + "/rest/v1.0/message", HttpMethod.GET, requestEntity, String.class);
+		logger.info("=====================================");
+		logger.info("Etag     : {}", response.getHeaders().getETag());
+		logger.info("Response : {}", response.getBody());
+		etag = response.getHeaders().getETag();
+		assertTrue(response.getBody() == null);
+
 	}
 }
