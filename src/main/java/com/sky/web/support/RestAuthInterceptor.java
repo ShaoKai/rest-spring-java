@@ -27,13 +27,14 @@ public class RestAuthInterceptor implements HandlerInterceptor {
 		this.accessKeyHeaderName = accessKeyHeaderName;
 	}
 
+	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 		MultiReadHttpServletRequest httpRequest = new MultiReadHttpServletRequest(request);
 
 		String signature = StringUtils.defaultString(request.getHeader(signatureHeaderName), "");
 		String accessKey = StringUtils.defaultString(request.getHeader(accessKeyHeaderName), "");
 		if (signature.length() == 0) {
-			response.setStatus(response.SC_BAD_REQUEST);
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			response.flushBuffer();
 			return false;
 		}
@@ -41,7 +42,7 @@ public class RestAuthInterceptor implements HandlerInterceptor {
 		String requestBody = httpRequest.getRequestBody();
 		String secretKey = service.getSecretKey(accessKey);
 		if (StringUtils.isBlank(secretKey)) {
-			response.setStatus(response.SC_BAD_REQUEST);
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			response.flushBuffer();
 			return false;
 		}
@@ -51,7 +52,7 @@ public class RestAuthInterceptor implements HandlerInterceptor {
 		logger.info("signature    : {}", signature);
 
 		if (!signature.equals(verification)) {
-			response.setStatus(response.SC_UNAUTHORIZED);
+			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 			response.flushBuffer();
 			return false;
 		}
@@ -59,10 +60,12 @@ public class RestAuthInterceptor implements HandlerInterceptor {
 		return true;
 	}
 
+	@Override
 	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
 
 	}
 
+	@Override
 	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
 
 	}

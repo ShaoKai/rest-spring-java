@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 
 public class MultiReadServletFilter implements Filter {
 
+	@Override
 	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
 		// skip non-http requests
 		if (!(servletRequest instanceof HttpServletRequest)) {
@@ -24,10 +25,12 @@ public class MultiReadServletFilter implements Filter {
 		}
 	}
 
+	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
 
 	}
 
+	@Override
 	public void destroy() {
 	}
 

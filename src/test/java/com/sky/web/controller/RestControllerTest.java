@@ -8,7 +8,6 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -18,7 +17,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.sky.web.WebConfig;
-import com.sky.web.service.UserService;
 import com.sky.web.tools.RestUtils;
 
 public class RestControllerTest {
@@ -97,7 +95,7 @@ public class RestControllerTest {
 		HttpEntity<String> response = template.exchange(BASE_URL + "/rest/v1.0/message", HttpMethod.POST, requestEntity, String.class);
 		String etag = response.getHeaders().getETag();
 		logger.info("=====================================");
-		logger.info("Etag     : {}", response.getHeaders().getETag());
+		logger.info("Etag     : {}", etag);
 		logger.info("Response : {}", response.getBody());
 
 	}
@@ -117,7 +115,7 @@ public class RestControllerTest {
 		HttpEntity<String> response = template.exchange(BASE_URL + "/rest/v1.0/message", HttpMethod.GET, requestEntity, String.class);
 		String etag = response.getHeaders().getETag();
 		logger.info("=====================================");
-		logger.info("Etag     : {}", response.getHeaders().getETag());
+		logger.info("Etag     : {}", etag);
 		logger.info("Response : {}", response.getBody());
 
 		// send request with IfNoneMatch header
@@ -130,10 +128,11 @@ public class RestControllerTest {
 		parameters = new LinkedMultiValueMap<String, String>();
 		requestEntity = new HttpEntity<MultiValueMap<String, String>>(parameters, requestHeaders);
 		response = template.exchange(BASE_URL + "/rest/v1.0/message", HttpMethod.GET, requestEntity, String.class);
-		logger.info("=====================================");
-		logger.info("Etag     : {}", response.getHeaders().getETag());
-		logger.info("Response : {}", response.getBody());
 		etag = response.getHeaders().getETag();
+		logger.info("=====================================");
+		logger.info("Etag     : {}", etag);
+		logger.info("Response : {}", response.getBody());
+
 		assertTrue(response.getBody() == null);
 
 	}

@@ -1,9 +1,6 @@
 package com.sky.web;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -15,7 +12,6 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
-import com.sky.web.service.User;
 import com.sky.web.support.RestAuthInterceptor;
 
 @Configuration
@@ -28,6 +24,7 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 	private static final String VIEW_RESOLVER_SUFFIX = ".jsp";
 	private static final String REST_BASE_URL = "/rest/v1.0/*";
 
+	@Override
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 		converters.add(new MappingJackson2HttpMessageConverter());
 	}
@@ -45,6 +42,7 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 		return new RestAuthInterceptor(SIGNATURE_HEADER_NAME, ACCESS_TOKEN_HEADER_NAME);
 	}
 
+	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 		registry.addInterceptor(restLoginAuthInterceptor()).addPathPatterns(REST_BASE_URL).addPathPatterns(REST_BASE_URL);
 	}
