@@ -39,7 +39,7 @@ public class RestAuthInterceptor implements HandlerInterceptor {
 			return false;
 		}
 
-		String requestBody = httpRequest.getRequestBody();
+		String requestBody = httpRequest.getRequestBody(); // Don¡¦t do what Amazon did with Auth Signature version 1 and open yourself up to hash-collisions
 		String secretKey = service.getSecretKey(accessKey);
 		if (StringUtils.isBlank(secretKey)) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
