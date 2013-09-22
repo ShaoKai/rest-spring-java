@@ -1,7 +1,7 @@
 package com.sky.web.service;
 
 public class User {
-
+	private long userId;
 	private String account;
 	private String secretKey;
 	private String accessKey;
@@ -10,11 +10,20 @@ public class User {
 		super();
 	}
 
-	public User(String account, String secretKey, String accessKey) {
+	public User(long userId, String account, String secretKey, String accessKey) {
 		super();
+		this.userId = userId;
 		this.account = account;
 		this.secretKey = secretKey;
 		this.accessKey = accessKey;
+	}
+
+	public long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(long userId) {
+		this.userId = userId;
 	}
 
 	public String getAccessKey() {

@@ -1,13 +1,15 @@
-package com.sky.web.controller.json;
+package com.sky.web.resource;
 
-public class JsonMessage {
+import org.springframework.hateoas.ResourceSupport;
+
+public class MessageResource extends ResourceSupport {
 	private String message = "";
 	private String type = "";
 
-	public JsonMessage() {
+	public MessageResource() {
 	}
 
-	public JsonMessage(String type, String message) {
+	public MessageResource(String type, String message) {
 		this.message = message;
 		this.type = type;
 	}

@@ -1,6 +1,8 @@
-package com.sky.web.controller.json;
+package com.sky.web.resource;
 
-public class JsonException {
+import org.springframework.hateoas.ResourceSupport;
+
+public class ExceptionResource extends ResourceSupport {
 	private String errorMessage;
 
 	public String getErrorMessage() {
